@@ -1,8 +1,9 @@
 FROM gradle:8.3-jdk17 AS build
 WORKDIR /app
 COPY build.gradle settings.gradle ./
+COPY applications/app-service/build.gradle ./
 RUN gradle dependencies --no-daemon
-COPY src ./src
+COPY applications/app-service/src ./src
 RUN gradle build --no-daemon -x test
 
 FROM openjdk:17-jdk-slim
