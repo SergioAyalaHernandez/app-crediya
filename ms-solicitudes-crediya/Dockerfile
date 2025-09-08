@@ -8,8 +8,12 @@ WORKDIR /app/app-service
 # Limitar memoria de Gradle
 ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx1024m"
 
-# Instalar dependencias y build
-RUN gradle build --no-daemon -x test --stacktrace
+# Usar Gradle Wrapper si existe y refrescar dependencias para que descargue plugins
+RUN if [ -f "./gradlew" ]; then \
+        ./gradlew build --no-daemon -x test --refresh-dependencies --stacktrace; \
+    else \
+        gradle build --no-daemon -x test --refresh-dependencies --stacktrace; \
+    fi
 
 # Stage final
 FROM openjdk:17-jdk-slim
