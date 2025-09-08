@@ -3,7 +3,7 @@ FROM gradle:8.4-jdk17 AS build
 
 WORKDIR /app
 
-# Copiar archivos de configuración de Gradle y el wrapper
+# Copiar archivos de configuración y wrapper de Gradle
 COPY build.gradle settings.gradle main.gradle ./
 COPY gradle/ gradle/
 COPY gradlew gradlew
