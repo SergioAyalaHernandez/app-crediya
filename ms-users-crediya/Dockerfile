@@ -1,4 +1,4 @@
-FROM gradle:8.12-jdk17 AS build
+FROM gradle:8.12-jdk21 AS build
 
 WORKDIR /app
 
@@ -14,12 +14,12 @@ COPY applications/ ./applications/
 COPY domain/ ./domain/
 COPY infrastructure/ ./infrastructure/
 
-# Build app-service - usar el nombre correcto del proyecto
+# Build app-service
 RUN chmod +x ./gradlew && ./gradlew :app-service:build --no-daemon -x test -x validateStructure
 
 # Runtime
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 COPY --from=build /app/applications/app-service/build/libs/*.jar app-service.jar
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app-service.jar"]
