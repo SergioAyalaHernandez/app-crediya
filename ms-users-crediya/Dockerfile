@@ -6,14 +6,17 @@ WORKDIR /app
 # Copiar archivos de configuración de Gradle
 COPY build.gradle settings.gradle main.gradle ./
 COPY gradle/ gradle/
+COPY gradlew gradlew
+COPY gradlew.bat gradlew.bat
+COPY gradle/wrapper/ gradle/wrapper/
 COPY gradle.properties ./
 
-# Copiar todo el código fuente
+# Copiar código fuente
 COPY applications/ ./applications/
 COPY domain/ ./domain/
 COPY infrastructure/ ./infrastructure/
 
-# Ejecutar build del módulo app-service
+# Dar permisos y ejecutar build
 RUN chmod +x ./gradlew && ./gradlew :app-service:build --no-daemon -x test --stacktrace
 
 # Stage 2: Runtime
@@ -21,7 +24,7 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-# Copiar jar generado desde la etapa de build
+# Copiar jar desde build stage
 COPY --from=build /app/app-service/build/libs/*.jar app-service.jar
 
 # Comando para ejecutar la app
