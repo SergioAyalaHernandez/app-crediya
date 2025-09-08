@@ -27,7 +27,7 @@ cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 adapters:
   r2dbc:
-    host: "localhost"
+    host: "postgres-db"
     port: 5432
     database: "postgres"
     schema: "crediya"
@@ -39,6 +39,7 @@ adapters:
       max-size: 100
       maxLifeTime: -1
       validation-query: "SELECT 1"
+
 adapter:
   restconsumer:
     timeout: 5000

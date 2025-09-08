@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-crediya
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 920808Ser.
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - trafico-network
+    restart: unless-stopped
+
+  ms-solicitudes:
+    build:
+      context: ./ms-solicitudes-crediya
+      dockerfile: Dockerfile
+    image: docker.io/library/ms-solicitudes-crediya:latest
+    container_name: ms-solicitudes-crediya
+    ports:
+      - "8081:8081"
+    networks:
+      - trafico-network
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  ms-users:
+    build:
+      context: ./ms-users-crediya
+      dockerfile: Dockerfile
+    image: docker.io/library/ms-users-crediya:latest
+    container_name: ms-users-crediya
+    ports:
+      - "8080:8080"
+    networks:
+      - trafico-network
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+networks:
+  trafico-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
