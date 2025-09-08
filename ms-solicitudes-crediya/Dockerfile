@@ -1,31 +1,27 @@
 # Stage 1: Build
 FROM gradle:8.4-jdk17 AS build
+
 WORKDIR /app
 
-# Limitar memoria y desactivar daemon
-ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
-
-# Copiar archivos raíz del proyecto
+# Copiar archivos de configuración de Gradle
 COPY build.gradle settings.gradle main.gradle ./
 COPY gradle/ gradle/
 
-# Copiar todos los subproyectos necesarios
+# Copiar todo el código fuente
 COPY applications/ ./applications/
 COPY domain/ ./domain/
 COPY infrastructure/ ./infrastructure/
 
-# Ejecutar build desde el root para ms-solicitudes
-RUN if [ -f "./gradlew" ]; then \
-        chmod +x ./gradlew && \
-        ./gradlew :applications:app-service:build --no-daemon -x test --stacktrace; \
-    else \
-        gradle :applications:app-service:build --no-daemon -x test --stacktrace; \
-    fi
+# Ejecutar build del módulo app-service
+RUN chmod +x ./gradlew && ./gradlew :app-service:build --no-daemon -x test --stacktrace
 
 # Stage 2: Runtime
 FROM openjdk:17-jdk-slim
+
 WORKDIR /app
 
-COPY --from=build /app/applications/app-service/build/libs/*.jar app.jar
+# Copiar jar generado desde la etapa de build
+COPY --from=build /app/app-service/build/libs/*.jar app-service.jar
 
-ENTRYPOINT ["java","-jar","app.jar"]
+# Comando para ejecutar la app
+ENTRYPOINT ["java","-jar","app-service.jar"]
