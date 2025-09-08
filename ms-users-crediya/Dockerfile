@@ -1,19 +1,15 @@
 FROM gradle:8.3-jdk17 AS build
 WORKDIR /app
 
-# Copiar los gradle scripts
-COPY build.gradle ./
-COPY settings.gradle ./
+# Copiar todo el subproyecto
+COPY applications/app-service/ ./app-service/
+WORKDIR /app/app-service
 
-# Instalar dependencias
-RUN gradle dependencies --no-daemon || true
-
-# Copiar el código fuente del servicio
-COPY applications/app-service/src ./src
+# Instalar dependencias y build
 RUN gradle build --no-daemon -x test --stacktrace
 
 # Stage final
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/app-service/build/libs/*.jar app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
