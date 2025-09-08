@@ -1,5 +1,6 @@
 # Stage 1: Build
-FROM gradle:8.3-jdk17 AS build
+FROM gradle:8.4-jdk17 AS build
+
 WORKDIR /app
 
 ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
