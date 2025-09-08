@@ -3,12 +3,10 @@ FROM gradle:8.4-jdk17 AS build
 
 WORKDIR /app
 
-# Copiar archivos de configuración y wrapper de Gradle
+# Copiar archivos de configuración de Gradle
 COPY build.gradle settings.gradle main.gradle ./
 COPY gradle/ gradle/
-COPY gradlew gradlew
-COPY gradlew.bat gradlew.bat
-COPY gradle/wrapper/ gradle/wrapper/
+COPY gradle.properties ./
 
 # Copiar todo el código fuente
 COPY applications/ ./applications/
@@ -27,4 +25,4 @@ WORKDIR /app
 COPY --from=build /app/app-service/build/libs/*.jar app-service.jar
 
 # Comando para ejecutar la app
-ENTRYPOINT ["java", "-jar", "app-service.jar"]
+ENTRYPOINT ["java","-jar","app-service.jar"]
