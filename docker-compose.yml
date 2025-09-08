@@ -18,8 +18,8 @@ services:
 
   ms-solicitudes:
     build:
-      context: ./ms-solicitudes-crediya
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ms-solicitudes-crediya/Dockerfile
     container_name: ms-solicitudes-crediya
     ports:
       - "8081:8081"
@@ -31,8 +31,8 @@ services:
 
   ms-users:
     build:
-      context: ./ms-users-crediya
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ms-users-crediya/Dockerfile
     container_name: ms-users-crediya
     ports:
       - "8080:8080"
