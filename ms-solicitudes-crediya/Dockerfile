@@ -1,9 +1,12 @@
 FROM gradle:8.3-jdk17 AS build
 WORKDIR /app
 
-# Copiar todo el subproyecto
+# Copiar proyecto
 COPY applications/app-service/ ./app-service/
 WORKDIR /app/app-service
+
+# Limitar memoria de Gradle
+ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx1024m"
 
 # Instalar dependencias y build
 RUN gradle build --no-daemon -x test --stacktrace
