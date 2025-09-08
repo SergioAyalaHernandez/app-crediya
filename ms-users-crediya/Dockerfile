@@ -14,8 +14,8 @@ COPY applications/ ./applications/
 COPY domain/ ./domain/
 COPY infrastructure/ ./infrastructure/
 
-# Build app-service ignorando validateStructure
-RUN chmod +x ./gradlew && ./gradlew :applications:app-service:build --no-daemon -x test -x validateStructure
+# Build app-service - usar el nombre correcto del proyecto
+RUN chmod +x ./gradlew && ./gradlew :app-service:build --no-daemon -x test -x validateStructure
 
 # Runtime
 FROM openjdk:17-jdk-slim
