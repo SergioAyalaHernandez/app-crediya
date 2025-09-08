@@ -10,7 +10,7 @@ RUN gradle dependencies --no-daemon || true
 
 # Copiar el código fuente del servicio
 COPY applications/app-service/src ./src
-RUN gradle build --no-daemon -x test
+RUN gradle build --no-daemon -x test --stacktrace
 
 # Stage final
 FROM openjdk:17-jdk-slim
