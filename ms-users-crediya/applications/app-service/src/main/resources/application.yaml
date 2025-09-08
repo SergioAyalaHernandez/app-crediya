@@ -7,7 +7,7 @@ spring:
     add-properties: false
 adapters:
   r2dbc:
-    host: "postgres-db"
+    host: "localhost"
     port: 5432
     database: "postgres"
     schema: "crediya"
@@ -19,6 +19,8 @@ adapters:
       max-size: 100
       maxLifeTime: -1
       validation-query: "SELECT 1"
+  profiles:
+    include: null
 management:
   endpoints:
     web:
