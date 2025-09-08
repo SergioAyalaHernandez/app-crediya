@@ -12,7 +12,6 @@ services:
       POSTGRES_PASSWORD: 920808Ser.
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ~/.aws:/root/.aws:ro
     networks:
       - trafico-network
     restart: unless-stopped
@@ -30,6 +29,8 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - ~/.aws:/root/.aws:ro
 
   ms-users:
     build:
