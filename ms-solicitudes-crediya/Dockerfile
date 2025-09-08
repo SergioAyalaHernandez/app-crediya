@@ -2,22 +2,19 @@
 FROM gradle:8.4-jdk17 AS build
 WORKDIR /app
 
+# Limitar memoria y desactivar daemon
 ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
 
-# Copiar archivos raíz
+# Copiar archivos raíz del proyecto
 COPY build.gradle settings.gradle main.gradle ./
+COPY gradle/ gradle/
 
-# Copiar todos los subproyectos
+# Copiar todos los subproyectos necesarios
 COPY applications/ ./applications/
-COPY sqs-sender/ ./sqs-sender/
-COPY metrics/ ./metrics/
-COPY rest-consumer/ ./rest-consumer/
-COPY r2dbc-postgresql/ ./r2dbc-postgresql/
-COPY reactive-web/ ./reactive-web/
-COPY model/ ./model/
-COPY usecase/ ./usecase/
+COPY domain/ ./domain/
+COPY infrastructure/ ./infrastructure/
 
-# Ejecutar build desde el root para app-service
+# Ejecutar build desde el root para ms-solicitudes
 RUN if [ -f "./gradlew" ]; then \
         chmod +x ./gradlew && \
         ./gradlew :applications:app-service:build --no-daemon -x test --stacktrace; \
