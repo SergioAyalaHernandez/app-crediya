@@ -46,6 +46,21 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
+  ms-report:
+    build:
+      context: ./ms-reportes
+      dockerfile: Dockerfile
+    container_name: ms-reportes-crediya
+    ports:
+      - "8082:8082"
+    networks:
+      - trafico-network
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - /home/ubuntu/.aws:/root/.aws:ro
+
 networks:
   trafico-network:
     driver: bridge
