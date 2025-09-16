@@ -18,7 +18,7 @@ public interface CreditApplicationRepository extends ReactiveCrudRepository<Cred
                 tc.nombre AS tipocredito,
                 sc.tasa_interes AS tasainteres,
                 u.salario_base AS salariobase,
-                sc.estado AS estadosolicitud
+                sc.estado_solicitud AS estadosolicitud
               FROM crediya.solicitudes_credito sc
               LEFT JOIN crediya.tipos_credito tc ON sc.id_tipo_credito = tc.id
               LEFT JOIN crediya.users u ON sc.user_id = u.id
@@ -29,4 +29,5 @@ public interface CreditApplicationRepository extends ReactiveCrudRepository<Cred
   @Query("SELECT COUNT(*) FROM crediya.solicitudes_credito")
   Mono<Long> countAllCredits();
 
+  Flux<CreditApplication> findAllByUserId(Long userId);
 }

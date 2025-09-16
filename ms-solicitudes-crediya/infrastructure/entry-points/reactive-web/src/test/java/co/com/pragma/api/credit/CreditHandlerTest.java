@@ -5,6 +5,7 @@ import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditDetailDTO;
 import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.model.credit.CreditReponse;
+import co.com.pragma.usecase.CalculateDebtCapacityUseCase;
 import co.com.pragma.usecase.CreateCreditUseCase;
 import co.com.pragma.usecase.CreditListUseCase;
 import co.com.pragma.usecase.UpdateCreditUseCase;
@@ -40,6 +41,9 @@ class CreditHandlerTest {
   private UpdateCreditUseCase updateCreditUSeCase;
 
   @Mock
+  private CalculateDebtCapacityUseCase calculateDebtCapacityUseCase;
+
+  @Mock
   private ServerRequest serverRequest;
 
   private CreditHandler creditHandler;
@@ -47,7 +51,7 @@ class CreditHandlerTest {
   @BeforeEach
   void setUp() {
     // Arrange
-    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase, updateCreditUSeCase);
+    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase, updateCreditUSeCase, calculateDebtCapacityUseCase);
   }
 
   @Test
@@ -199,10 +203,11 @@ class CreditHandlerTest {
     Long id = 1L;
     CreditApproved creditApproved = new CreditApproved();
     CreditReponse expectedResponse = new CreditReponse();
-
+    when(serverRequest.headers()).thenReturn(Mockito.mock(ServerRequest.Headers.class));
+    when(serverRequest.headers().firstHeader(Constants.HEADER_AUTHORIZATION)).thenReturn("Bearer token");
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved))).thenReturn(Mono.just(expectedResponse));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved), eq("Bearer token"))).thenReturn(Mono.just(expectedResponse));
 
     // Act
     Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
@@ -218,12 +223,12 @@ class CreditHandlerTest {
     // Arrange
     Long id = 1L;
     CreditApproved creditApproved = new CreditApproved();
-    String errorMessage = "Credit not found";
-
+    when(serverRequest.headers()).thenReturn(Mockito.mock(ServerRequest.Headers.class));
+    when(serverRequest.headers().firstHeader(Constants.HEADER_AUTHORIZATION)).thenReturn("Bearer token");
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
-            .thenReturn(Mono.error(new NotFoundException(errorMessage)));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved), eq("Bearer token")))
+            .thenReturn(Mono.error(new NotFoundException("Credit not found")));
 
     // Act
     Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
@@ -241,9 +246,12 @@ class CreditHandlerTest {
     CreditApproved creditApproved = new CreditApproved();
     String errorMessage = "Internal server error";
 
+    ServerRequest.Headers headers = Mockito.mock(ServerRequest.Headers.class);
+    when(headers.firstHeader(Constants.HEADER_AUTHORIZATION)).thenReturn("Bearer token");
+    when(serverRequest.headers()).thenReturn(headers);
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved), eq("Bearer token")))
             .thenReturn(Mono.error(new RuntimeException(errorMessage)));
 
     // Act
@@ -252,6 +260,52 @@ class CreditHandlerTest {
     // Assert
     StepVerifier.create(result)
             .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
+            .verifyComplete();
+  }
+
+  @Test
+  void calculateDebtCapacity_Success() {
+    // Arrange
+    String token = "Bearer token";
+    CreditParameters creditParameters = new CreditParameters();
+    CreditReponse expectedResponse = new CreditReponse();
+
+    ServerRequest.Headers headers = Mockito.mock(ServerRequest.Headers.class);
+    when(headers.firstHeader(Constants.HEADER_AUTHORIZATION)).thenReturn(token);
+    when(serverRequest.headers()).thenReturn(headers);
+    when(serverRequest.bodyToMono(CreditParameters.class)).thenReturn(Mono.just(creditParameters));
+    when(calculateDebtCapacityUseCase.createCreditAutomatic(eq(creditParameters), eq(token)))
+            .thenReturn(Mono.just(expectedResponse));
+
+    // Act
+    Mono<ServerResponse> result = creditHandler.calculateDebtCapacity(serverRequest);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response -> response.statusCode().is2xxSuccessful())
+            .verifyComplete();
+  }
+
+  @Test
+  void calculateDebtCapacity_Error() {
+    // Arrange
+    String token = "Bearer token";
+    CreditParameters creditParameters = new CreditParameters();
+    String errorMessage = "Error calculating debt capacity";
+
+    ServerRequest.Headers headers = Mockito.mock(ServerRequest.Headers.class);
+    when(headers.firstHeader(Constants.HEADER_AUTHORIZATION)).thenReturn(token);
+    when(serverRequest.headers()).thenReturn(headers);
+    when(serverRequest.bodyToMono(CreditParameters.class)).thenReturn(Mono.just(creditParameters));
+    when(calculateDebtCapacityUseCase.createCreditAutomatic(eq(creditParameters), eq(token)))
+            .thenReturn(Mono.error(new RuntimeException(errorMessage)));
+
+    // Act
+    Mono<ServerResponse> result = creditHandler.calculateDebtCapacity(serverRequest);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response -> response.statusCode().is5xxServerError())
             .verifyComplete();
   }
 }

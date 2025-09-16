@@ -21,5 +21,5 @@ RUN chmod +x ./gradlew && ./gradlew :app-service:build --no-daemon -x test -x va
 FROM openjdk:21-jdk-slim
 WORKDIR /app
 COPY --from=build /app/applications/app-service/build/libs/*.jar app-service.jar
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app-service.jar"]
